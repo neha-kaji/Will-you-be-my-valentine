@@ -13,15 +13,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 20px 12px;
     overflow: hidden;
   }
 
   /* floating hearts */
   .bg-heart {
     position: fixed;
-    font-size: 22px;
-    opacity: 0.25;
+    font-size: 20px;
+    opacity: 0.22;
     animation: floatUp 8s linear infinite;
     z-index: 0;
   }
@@ -35,58 +36,57 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 24px;
     z-index: 2;
   }
 
   .teddy {
-    width: 150px;
-    max-width: 45vw;
+    width: 140px;
     animation: teddyDance 1.2s infinite alternate;
   }
 
   @keyframes teddyDance {
-    from { transform: rotate(-8deg) translateY(0); }
-    to { transform: rotate(8deg) translateY(-12px); }
+    from { transform: rotate(-6deg) translateY(0); }
+    to { transform: rotate(6deg) translateY(-10px); }
   }
 
   .card {
     background: white;
-    padding: 44px;
-    border-radius: 42px;
-    box-shadow: 0 30px 70px rgba(0,0,0,0.25);
-    width: 96%;
-    max-width: 500px;
+    padding: 36px;
+    border-radius: 36px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    width: 100%;
+    max-width: 480px;
     text-align: center;
     animation: float 3s ease-in-out infinite;
   }
 
   h1 {
     color: #ff2f77;
-    font-size: 32px;
-    margin-bottom: 14px;
+    font-size: 30px;
+    margin-bottom: 12px;
   }
 
   p {
     color: #555;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1.5;
   }
 
   .btn-row {
     display: flex;
     justify-content: center;
-    gap: 26px;
-    margin-top: 34px;
+    gap: 20px;
+    margin-top: 28px;
   }
 
   button {
     background: #ff2f77;
     color: white;
     border: none;
-    padding: 18px 38px;
-    border-radius: 50px;
-    font-size: 20px;
+    padding: 16px 34px;
+    border-radius: 48px;
+    font-size: 18px;
     cursor: pointer;
     white-space: nowrap;
     transition: transform 0.25s ease;
@@ -97,25 +97,45 @@
   }
 
   @keyframes glow {
-    from { box-shadow: 0 0 14px rgba(255,47,119,0.6); }
-    to { box-shadow: 0 0 36px rgba(255,47,119,1); }
+    from { box-shadow: 0 0 12px rgba(255,47,119,0.6); }
+    to { box-shadow: 0 0 32px rgba(255,47,119,1); }
   }
 
   .hidden-message {
-    margin-top: 30px;
-    font-size: 22px;
+    margin-top: 24px;
+    font-size: 20px;
     color: #ff2f77;
     display: none;
   }
 
   @keyframes float {
     0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
+    50% { transform: translateY(-10px); }
   }
 
-  @media (max-width: 768px) {
-    .scene { flex-direction: column; }
-    .teddy { width: 120px; }
+  /* IMPORTANT: runaway applies ALWAYS */
+  #noBtn.runaway {
+    position: fixed;
+    z-index: 10;
+  }
+
+  @media (max-width: 600px) {
+    .scene {
+      flex-direction: column;
+    }
+    .teddy {
+      width: 110px;
+    }
+    h1 {
+      font-size: 26px;
+    }
+    p {
+      font-size: 16px;
+    }
+    button {
+      font-size: 16px;
+      padding: 14px 26px;
+    }
   }
 </style>
 </head>
@@ -123,7 +143,7 @@
 <body>
 
 <script>
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 24; i++) {
     const h = document.createElement("div");
     h.className = "bg-heart";
     h.innerHTML = "💗";
@@ -139,7 +159,7 @@
   <div class="card" id="card">
     <h1>Baby… 💕</h1>
     <p>
-      Will you be my Valentine, darling?  
+      Will you be my Valentine, darling?<br>
       I want every heartbeat of this day to be ours 💖
     </p>
 
@@ -149,8 +169,8 @@
     </div>
 
     <div class="hidden-message" id="loveMessage">
-      YAYYYYY ❤️❤️ 
-      You’re officially my Valentine 💕  
+      YAYYYYY ❤️❤️<br>
+      You’re officially my Valentine 💕<br>
       I love you endlessly, my baby 🌷
     </div>
   </div>
@@ -184,7 +204,7 @@
 
     if (!escaped) {
       const r = noBtn.getBoundingClientRect();
-      noBtn.style.position = "fixed";
+      noBtn.classList.add("runaway");
       noBtn.style.left = r.left + "px";
       noBtn.style.top = r.top + "px";
       escaped = true;
@@ -194,13 +214,18 @@
     msgIndex = (msgIndex + 1) % messages.length;
 
     const cardRect = card.getBoundingClientRect();
-    const pad = 35;
+    const roamX = window.innerWidth < 600 ? 60 : 120;
+    const roamY = window.innerWidth < 600 ? 50 : 100;
 
-    // safe area around card
-    const minX = Math.max(10, cardRect.left - pad);
-    const maxX = Math.min(window.innerWidth - noBtn.offsetWidth - 10, cardRect.right + pad);
-    const minY = Math.max(10, cardRect.top - pad);
-    const maxY = Math.min(window.innerHeight - noBtn.offsetHeight - 10, cardRect.bottom + pad);
+    let minX = cardRect.left - roamX;
+    let maxX = cardRect.right + roamX - noBtn.offsetWidth;
+    let minY = cardRect.top - roamY;
+    let maxY = cardRect.bottom + roamY - noBtn.offsetHeight;
+
+    minX = Math.max(10, minX);
+    minY = Math.max(10, minY);
+    maxX = Math.min(window.innerWidth - noBtn.offsetWidth - 10, maxX);
+    maxY = Math.min(window.innerHeight - noBtn.offsetHeight - 10, maxY);
 
     const x = Math.random() * (maxX - minX) + minX;
     const y = Math.random() * (maxY - minY) + minY;
@@ -210,7 +235,10 @@
   }
 
   noBtn.addEventListener("mouseover", moveButton);
-  noBtn.addEventListener("touchstart", e => { e.preventDefault(); moveButton(); });
+  noBtn.addEventListener("touchstart", e => {
+    e.preventDefault();
+    moveButton();
+  });
 
   yesBtn.addEventListener("click", async () => {
     teddy.src = "teddy-happy.gif";
