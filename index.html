@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Be My Valentine 💖</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #ff2f77, #ff6fa5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* hearts behind */
+  .bg-heart {
+    position: absolute;
+    font-size: 22px;
+    opacity: 0.25;
+    animation: floatUp 8s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes floatUp {
+    from { transform: translateY(110vh); }
+    to { transform: translateY(-10vh); }
+  }
+
+  /* wrapper for safe positioning */
+  .scene {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    z-index: 2;
+  }
+
+  /* teddy */
+  .teddy {
+    width: 150px;
+    max-width: 45vw;
+    animation: teddyDance 1.2s infinite alternate;
+  }
+
+  @keyframes teddyDance {
+    from { transform: rotate(-8deg) translateY(0); }
+    to { transform: rotate(8deg) translateY(-12px); }
+  }
+
+  /* card */
+  .card {
+    position: relative;
+    background: white;
+    padding: 44px;
+    border-radius: 42px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.25);
+    width: 96%;
+    max-width: 500px;
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  h1 {
+    color: #ff2f77;
+    font-size: 32px;
+    margin-bottom: 14px;
+  }
+
+  p {
+    color: #555;
+    font-size: 20px;
+    line-height: 1.5;
+  }
+
+  .btn-row {
+    display: flex;
+    justify-content: center;
+    gap: 26px;
+    margin-top: 34px;
+  }
+
+  button {
+    background: #ff2f77;
+    color: white;
+    border: none;
+    padding: 18px 38px;
+    border-radius: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  #yesBtn {
+    animation: glow 1s infinite alternate;
+  }
+
+  @keyframes glow {
+    from { box-shadow: 0 0 14px rgba(255,47,119,0.6); }
+    to { box-shadow: 0 0 36px rgba(255,47,119,1); }
+  }
+
+  .hidden-message {
+    margin-top: 30px;
+    font-size: 22px;
+    color: #ff2f77;
+    display: none;
+  }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @media (max-width: 768px) {
+    .scene { flex-direction: column; }
+    .teddy { width: 120px; }
+  }
+</style>
+</head>
+
+<body>
+
+<script>
+  // hearts behind card
+  for (let i = 0; i < 28; i++) {
+    const h = document.createElement("div");
+    h.className = "bg-heart";
+    h.innerHTML = "💗";
+    h.style.left = Math.random() * 100 + "vw";
+    h.style.animationDuration = (6 + Math.random() * 4) + "s";
+    document.body.appendChild(h);
+  }
+</script>
+
+<div class="scene" id="scene">
+  <img src="teddy-dance.gif" class="teddy" id="teddy" alt="Teddy">
+
+  <div class="card" id="card">
+    <h1>Baby… 💕</h1>
+    <p>
+      Will you be my Valentine, darling?  
+      I want every heartbeat of this day to be ours 💖
+    </p>
+
+    <div class="btn-row">
+      <button id="yesBtn">Yes, darling ❤️</button>
+      <button id="noBtn">No 😤</button>
+    </div>
+
+    <div class="hidden-message" id="loveMessage">
+      YAYYYYY ❤️❤️  
+      You’re officially my Valentine 💕  
+      I love you endlessly, my baby 🌷
+    </div>
+  </div>
+</div>
+
+<audio id="bgMusic" src="dandelions.mp3" preload="auto"></audio>
+
+<script>
+  const noBtn = document.getElementById("noBtn");
+  const yesBtn = document.getElementById("yesBtn");
+  const card = document.getElementById("card");
+  const scene = document.getElementById("scene");
+  const teddy = document.getElementById("teddy");
+  const music = document.getElementById("bgMusic");
+
+  const messages = [
+    "Baby please 🥺",
+    "Darling nooo 😭",
+    "You love me 💕",
+    "Think again 😩",
+    "Stop teasing 😜",
+    "My heart 💔",
+    "I’ll cry 😭",
+    "Okay I’m begging 😭"
+  ];
+
+  let msgIndex = 0;
+  let escaped = false;
+
+  function moveButton() {
+    teddy.src = "teddy-sad.gif";
+
+    if (!escaped) {
+      const r = noBtn.getBoundingClientRect();
+      const s = scene.getBoundingClientRect();
+
+      noBtn.style.position = "absolute";
+      noBtn.style.left = (r.left - s.left) + "px";
+      noBtn.style.top = (r.top - s.top) + "px";
+      scene.appendChild(noBtn);
+
+      escaped = true;
+    }
+
+    noBtn.innerText = messages[msgIndex];
+    msgIndex = (msgIndex + 1) % messages.length;
+
+    const cardRect = card.getBoundingClientRect();
+    const sceneRect = scene.getBoundingClientRect();
+    const pad = 40;
+
+    // safe area around card INSIDE scene
+    const minX = cardRect.left - sceneRect.left - pad;
+    const maxX = cardRect.right - sceneRect.left + pad - noBtn.offsetWidth;
+    const minY = cardRect.top - sceneRect.top - pad;
+    const maxY = cardRect.bottom - sceneRect.top + pad - noBtn.offsetHeight;
+
+    const x = Math.max(minX, Math.min(maxX, Math.random() * (maxX - minX) + minX));
+    const y = Math.max(minY, Math.min(maxY, Math.random() * (maxY - minY) + minY));
+
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+  }
+
+  noBtn.addEventListener("mouseover", moveButton);
+  noBtn.addEventListener("touchstart", e => {
+    e.preventDefault();
+    moveButton();
+  });
+
+  yesBtn.addEventListener("click", async () => {
+    teddy.src = "teddy-happy.gif";
+    document.getElementById("loveMessage").style.display = "block";
+
+    try {
+      await music.play();
+    } catch (e) {
+      console.log("Audio play blocked:", e);
+    }
+  });
+</script>
+
+</body>
+</html>
